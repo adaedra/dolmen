@@ -196,36 +196,53 @@ macro_rules! data {
     }};
 }
 
-#[test]
-fn test_simple_tag() {
-    assert_eq!(node!(div).to_string(), "<div />");
-}
+#[cfg(test)]
+mod tests {
+    use crate::{attributes, tags, NodeBase};
 
-#[test]
-fn test_tag_with_text() {
-    assert_eq!(
-        node!(div { text!("Hello, world!") }).to_string(),
-        "<div>Hello, world!</div>"
-    );
-}
+    #[test]
+    fn test_simple_tag() {
+        assert_eq!(node!(div).to_string(), "<div />");
+    }
 
-#[test]
-fn test_tag_with_id() {
-    assert_eq!(node!(div(id: "foo")).to_string(), r#"<div id="foo" />"#);
-}
+    #[test]
+    fn test_tag_with_text() {
+        assert_eq!(
+            node!(div { text!("Hello, world!") }).to_string(),
+            "<div>Hello, world!</div>"
+        );
+    }
 
-#[test]
-fn test_tag_with_children() {
-    assert_eq!(
-        node!(div { node!(span), node!(span) }).to_string(),
-        "<div><span /><span /></div>"
-    );
-}
+    #[test]
+    fn test_tag_with_id() {
+        assert_eq!(node!(div(id: "foo")).to_string(), r#"<div id="foo" />"#);
+    }
 
-#[test]
-fn test_data() {
-    assert_eq!(
-        node!(div(data: data!(foo: "bar"))).to_string(),
-        r#"<div data-foo="bar" />"#
-    );
+    #[test]
+    fn test_tag_with_children() {
+        assert_eq!(
+            node!(div { node!(span), node!(span) }).to_string(),
+            "<div><span /><span /></div>"
+        );
+    }
+
+    #[test]
+    fn test_data() {
+        assert_eq!(
+            node!(div(data: data!(foo: "bar"))).to_string(),
+            r#"<div data-foo="bar" />"#
+        );
+    }
+
+    fn component(content: &str) -> Box<tags::div::Element> {
+        node!(div(class:"component") { text!(content) })
+    }
+
+    #[test]
+    fn test_component() {
+        assert_eq!(
+            node!(span { component("Hello!") }).to_string(),
+            r#"<span><div class="component">Hello!</div></span>"#
+        );
+    }
 }
