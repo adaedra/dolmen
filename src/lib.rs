@@ -141,6 +141,24 @@ pub mod attributes {
 
     impl DefaultAttribute for class::Attribute {}
     impl DefaultAttribute for id::Attribute {}
+
+    pub mod data {
+        use std::collections::HashMap;
+
+        pub struct Attribute(pub HashMap<String, String>);
+
+        impl crate::AttributeBase for Attribute {
+            fn to_string(&self) -> String {
+                self.0
+                    .iter()
+                    .map(|(ref name, ref value)| format!(r#"data-{}="{}""#, name, value))
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            }
+        }
+    }
+
+    impl DefaultAttribute for data::Attribute {}
 }
 
 #[macro_export]
@@ -166,6 +184,18 @@ macro_rules! text {
     };
 }
 
+#[macro_export]
+macro_rules! data {
+    ( $( $name:ident : $value:expr ),* ) => {{
+        use std::collections::HashMap;
+
+        let mut map = HashMap::new();
+        $( map.insert(stringify!($name).into(), $value.into()); )*
+
+        map
+    }};
+}
+
 #[test]
 fn test_simple_tag() {
     assert_eq!(node!(div).to_string(), "<div />");
@@ -189,5 +219,13 @@ fn test_tag_with_children() {
     assert_eq!(
         node!(div { node!(span), node!(span) }).to_string(),
         "<div><span /><span /></div>"
+    );
+}
+
+#[test]
+fn test_data() {
+    assert_eq!(
+        node!(div(data: data!(foo: "bar"))).to_string(),
+        r#"<div data-foo="bar" />"#
     );
 }
