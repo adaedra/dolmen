@@ -12,7 +12,10 @@ pub trait AttributeImpl {
     fn value(&self) -> String;
 }
 
-impl<T: ?Sized> AttributeBase for T where T: AttributeImpl {
+impl<T: ?Sized> AttributeBase for T
+where
+    T: AttributeImpl,
+{
     fn to_string(&self) -> String {
         format!(r#"{}="{}""#, Self::ATTRIBUTE_NAME, self.value())
     }
@@ -28,15 +31,32 @@ pub trait TagBase: NodeBase {
     fn children(&self) -> &Vec<Box<Self::Child>>;
 }
 
-impl<T: ?Sized> NodeBase for T where T: TagBase, T::Child: NodeBase, T::Attribute: AttributeBase {
+impl<T: ?Sized> NodeBase for T
+where
+    T: TagBase,
+    T::Child: NodeBase,
+    T::Attribute: AttributeBase,
+{
     fn to_string(&self) -> String {
         let children = self.children();
-        let attributes = self.attributes().iter().map(|ref attribute| format!(" {}", attribute.to_string())).collect::<String>();
+        let attributes = self
+            .attributes()
+            .iter()
+            .map(|ref attribute| format!(" {}", attribute.to_string()))
+            .collect::<String>();
 
         if children.len() == 0 {
             format!("<{}{} />", Self::TAG_NAME, attributes)
         } else {
-            format!("<{0}{2}>{1}</{0}>", Self::TAG_NAME, children.iter().map(|ref child| child.to_string()).collect::<String>(), attributes)
+            format!(
+                "<{0}{2}>{1}</{0}>",
+                Self::TAG_NAME,
+                children
+                    .iter()
+                    .map(|ref child| child.to_string())
+                    .collect::<String>(),
+                attributes
+            )
         }
     }
 }
@@ -73,10 +93,10 @@ pub mod tags {
     pub trait Empty: crate::NodeBase {}
     pub trait FlowElement: crate::NodeBase {}
 
-    use super::attributes::{DefaultAttribute};
+    use super::attributes::DefaultAttribute;
 
     make_tag!(span, FlowElement, DefaultAttribute);
-    make_tag!(div,  FlowElement, DefaultAttribute);
+    make_tag!(div, FlowElement, DefaultAttribute);
     make_tag!(html, FlowElement, DefaultAttribute);
 
     impl FlowElement for span::Element {}
@@ -169,10 +189,7 @@ fn main() {
 
 #[test]
 fn test_simple_tag() {
-    assert_eq!(
-        node!(div).to_string(),
-        "<div />"
-    );
+    assert_eq!(node!(div).to_string(), "<div />");
 }
 
 #[test]
@@ -185,10 +202,7 @@ fn test_tag_with_text() {
 
 #[test]
 fn test_tag_with_id() {
-    assert_eq!(
-        node!(div(id: "foo")).to_string(),
-        r#"<div id="foo" />"#
-    );
+    assert_eq!(node!(div(id: "foo")).to_string(), r#"<div id="foo" />"#);
 }
 
 #[test]
