@@ -143,6 +143,7 @@ pub mod attributes {
     impl DefaultAttribute for id::Attribute {}
 }
 
+#[macro_export]
 macro_rules! node {
     ($tag:ident) => {
         Box::new(tags::$tag::Element { children: Vec::default(), attributes: Vec::default() })
@@ -158,12 +159,14 @@ macro_rules! node {
     };
 }
 
+#[macro_export]
 macro_rules! text {
     ($text:expr) => {
         Box::new(tags::Text($text.into()))
     };
 }
 
+#[macro_export]
 macro_rules! classes {
     () => {
         vec![]
@@ -171,18 +174,6 @@ macro_rules! classes {
     ( $( $class:expr ),+ ) => {
         vec![$( $class.into() ),*]
     };
-}
-
-fn main() {
-    let document = node!(div(id: "foo") {
-        node!(div {
-            text!("Hello, world!"),
-            if true { node!(span) } else { node!(div) },
-            node!(span(class: classes!["small"]) { text!("Coucou") })
-        })
-    });
-
-    println!("{}", document.to_string());
 }
 
 #[test]
