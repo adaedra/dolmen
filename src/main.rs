@@ -64,8 +64,6 @@ where
 macro_rules! make_tag {
     ($name:ident, $children:ident, $attributes:ident) => {
         pub mod $name {
-            pub const TAG_NAME: &str = stringify!($name);
-
             pub struct Element {
                 pub children: Vec<Box<super::$children>>,
                 pub attributes: Vec<Box<super::$attributes>>,
