@@ -116,13 +116,13 @@ pub mod attributes {
     pub trait DefaultAttribute: crate::AttributeBase {}
 
     pub mod class {
-        pub struct Attribute(pub Vec<String>);
+        pub struct Attribute(pub String);
 
         impl crate::AttributeImpl for Attribute {
             const ATTRIBUTE_NAME: &'static str = "class";
 
             fn value(&self) -> String {
-                self.0.join(" ")
+                self.0.clone()
             }
         }
     }
@@ -166,16 +166,6 @@ macro_rules! text {
     };
 }
 
-#[macro_export]
-macro_rules! classes {
-    () => {
-        vec![]
-    };
-    ( $( $class:expr ),+ ) => {
-        vec![$( $class.into() ),*]
-    };
-}
-
 #[test]
 fn test_simple_tag() {
     assert_eq!(node!(div).to_string(), "<div />");
@@ -192,14 +182,6 @@ fn test_tag_with_text() {
 #[test]
 fn test_tag_with_id() {
     assert_eq!(node!(div(id: "foo")).to_string(), r#"<div id="foo" />"#);
-}
-
-#[test]
-fn test_tag_with_classes() {
-    assert_eq!(
-        node!(div(class: classes!("column-2", "small"))).to_string(),
-        r#"<div class="column-2 small" />"#
-    );
 }
 
 #[test]
