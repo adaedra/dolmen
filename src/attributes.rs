@@ -1,7 +1,9 @@
+/// Low-level trait for attributes. Used for some type magic.
 pub trait Base {
     fn to_string(&self) -> String;
 }
 
+/// Common format for a tag, implemented attributes should implement this trait.
 pub trait Attribute {
     const ATTRIBUTE_NAME: &'static str;
 
@@ -17,7 +19,11 @@ where
     }
 }
 
+/// Marker to indicate a tag does not take attributes. Should not be adopted
+/// by any attribute.
 pub trait None: Base {}
+
+/// The most basic attributes that most HTML elements share.
 pub trait DefaultAttribute: Base {}
 
 pub mod class {
@@ -47,6 +53,9 @@ pub mod id {
 impl DefaultAttribute for class::Attribute {}
 impl DefaultAttribute for id::Attribute {}
 
+/// A magic attribute that holds all the `data-*` attributes for a tag. The inner
+/// HashMap contains the data attributes to generate. This attribute will be expanded
+/// to many when converting to HTML.
 pub mod data {
     use std::collections::HashMap;
 

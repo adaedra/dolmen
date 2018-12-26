@@ -1,6 +1,65 @@
 pub mod attributes;
 pub mod tags;
 
+/// Creates the given node. This macro tries to make a sensible way of writing HTML in rust, without resorting to compiler plugins.
+/// Compiler plugins and custom syntaxes are nightly-only while this works in stable.
+///
+/// The most basic syntax for a tag is:
+/// ```
+/// # use dolmen::{node, tags::{self, Base}};
+/// # assert_eq!(
+/// node!(div) // => <div />
+/// # .to_string(), "<div />");
+/// ````
+///
+/// You can replace `div` by any other HTML node.
+///
+/// When you want to add children to a node, you put them into curled braces, separated by commas like in a list:attributes
+/// ```
+/// # use dolmen::{node, tags::{self, Base}};
+/// # assert_eq!(
+/// node!(div { node!(span), node!(span) }) // => <div><span /><span /></div>
+/// # .to_string(), "<div><span /><span /></div>");
+/// ```
+///  
+/// For inserting text, you can use the `text!` macro:
+/// ```
+/// # use dolmen::{node, text, tags::{self, Base}};
+/// # assert_eq!(
+/// node!(div { text!("Hello!") }) // => <div>Hello!</div>
+/// # .to_string(), "<div>Hello!</div>");
+/// ```
+///
+/// The macro expects expressions, so you can use conditions and other control structures in your nodes:
+/// ```
+/// # use dolmen::{node, tags::{self, Base}};
+/// # assert_eq!(
+/// node!(div {
+///     if true {
+///         node!(span)
+///     } else {
+///         node!(div)
+///     }
+/// })
+/// # .to_string(), "<div><span /></div>");
+/// ```
+///
+/// To add attributes, use the following syntax:
+/// ```
+/// # use dolmen::{node, tags::{self, Base}, attributes};
+/// # assert_eq!(
+/// node!(div(class: "demo", id: "bar")) // => <div class="demo" id="bar" />
+/// # .to_string(), r#"<div class="demo" id="bar" />"#);
+/// ```
+///
+/// Again, the macro awaits expressions on the right side.
+///
+/// You also have the special `data!` macro to set `data-*` attributes:
+/// ```
+/// # use dolmen::{node, tags::{self, Base}, attributes, data};
+/// # assert_eq!(
+/// node!(div(data: data!(foo: "bar"))) // => <div data-foo="bar" />
+/// # .to_string(), r#"<div data-foo="bar" />"#);
 #[macro_export]
 macro_rules! node {
     ($tag:ident) => {
@@ -17,6 +76,7 @@ macro_rules! node {
     };
 }
 
+/// Create a simple text node.
 #[macro_export]
 macro_rules! text {
     ($text:expr) => {
@@ -24,6 +84,7 @@ macro_rules! text {
     };
 }
 
+/// Creates a HashMap for the `data` attribute. See `html!` for an example.
 #[macro_export]
 macro_rules! data {
     ( $( $name:ident : $value:expr ),* ) => {{
